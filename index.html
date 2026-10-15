@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workshop ContactRC Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: ContactRC training style. Navy top bar and hero, one reading column for explanation, a wide two-pane "flow studio" (scenario list + fill-in flow diagram) for the messages. */
+:root{
+  --navy:#00214D; --lav:#A78BFA; --ink:#1E1B2E;
+  --bg:#F6F5FB; --surface:#FFFFFF; --surface2:#F4F1FE; --fg:#1E1B2E; --muted:#5C5873; --line:#E1DEEA;
+  --accent:#4F22D7; --accent-fg:#FFFFFF; --accent-soft:#ECE6FE; --accent-text:#4F22D7;
+  --ok:#16794A; --ok-bg:#E3F5EB; --warn:#8A5A00; --warn-bg:#FFF3D6; --warn-line:#F0C462; --err:#B42318; --err-bg:#FDE8E6;
+  --shadow:0 1px 2px rgba(30,27,46,.06),0 8px 24px rgba(30,27,46,.06);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:14px; --r-sm:9px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#121020; --surface:#1B1930; --surface2:#24213D; --fg:#EDEAF7; --muted:#A8A3C2; --line:#322E4D;
+  --accent:#6B46F2; --accent-fg:#FFFFFF; --accent-soft:#2B2552; --accent-text:#BBA6FF;
+  --ok:#5FD39A; --ok-bg:#163327; --warn:#F5C866; --warn-bg:#3A2D10; --warn-line:#8A6A1F; --err:#FF8A80; --err-bg:#3D1A1A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121020; --surface:#1B1930; --surface2:#24213D; --fg:#EDEAF7; --muted:#A8A3C2; --line:#322E4D;
+  --accent:#6B46F2; --accent-fg:#FFFFFF; --accent-soft:#2B2552; --accent-text:#BBA6FF;
+  --ok:#5FD39A; --ok-bg:#163327; --warn:#F5C866; --warn-bg:#3A2D10; --warn-line:#8A6A1F; --err:#FF8A80; --err-bg:#3D1A1A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,4.4vw,3rem);font-weight:700}
+h2{font-size:clamp(1.5rem,3vw,1.9rem);font-weight:700}
+h3{font-size:1.15rem;font-weight:650}
+h4{font-size:1rem;font-weight:650}
+p{margin:0}
+a{color:var(--accent-text)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--lav);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono)}
+.muted{color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--navy);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 20px;min-height:56px;flex-wrap:wrap}
+.topbar img{height:24px;width:auto;display:block}
+.topbar .sep{width:1px;height:22px;background:rgba(255,255,255,.25)}
+.topbar nav{display:flex;gap:4px 14px;flex-wrap:wrap;font-size:.88rem;flex:1;min-width:0}
+.topbar nav a{color:#D9D4F5;text-decoration:none}
+.topbar nav a:hover{color:#fff}
+.topbar .status{font-size:.8rem;color:#C9C2EE}
+.tb-btn{border:1.5px solid var(--lav);background:transparent;color:#fff;border-radius:99px;padding:6px 14px;font-weight:650;font-size:.85rem}
+.tb-btn:hover{background:rgba(255,255,255,.1)}
+
+.main{padding-inline:20px;padding-block:28px 90px}
+.page{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+.col{max-width:740px}
+
+/* hero */
+.hero{background:var(--navy);color:#fff;border-radius:22px;padding:40px 36px;display:grid;gap:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;border:40px solid rgba(167,139,250,.14)}
+.hero > *{position:relative;z-index:1}
+.hero .eyebrow{color:var(--lav)}
+.hero h1{color:#fff;max-width:18ch}
+.hero p.lede{color:#D9D4F5;font-size:1.1rem;max-width:62ch}
+.hero dl{display:grid;grid-template-columns:minmax(0,420px);gap:14px 28px;margin:0;padding-top:18px;border-top:1px solid rgba(255,255,255,.15)}
+.hero dt{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:#B9B0EA;font-weight:700}
+.hero dd{margin:2px 0 0;font-weight:600}
+.hero input{font:inherit;width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 10px}
+.hero input::placeholder{color:#B9B0EA}
+@media (max-width:520px){.hero{padding:28px 20px}}
+
+.eyebrow{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--accent-text)}
+.sec-head{display:grid;gap:8px}
+.lead{font-size:1.06rem;color:var(--muted);max-width:66ch}
+section{display:flex;flex-direction:column;gap:22px;scroll-margin-top:80px}
+
+.tv{display:inline-flex;align-items:center;font-size:.7rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--warn);background:var(--warn-bg);border:1px dashed var(--warn-line);border-radius:99px;padding:1px 8px;vertical-align:.12em;white-space:nowrap}
+.callout{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--line);font-size:.95rem}
+.callout.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+.callout b{color:var(--accent-text)}
+.callout.warn b{color:var(--warn)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);min-width:0}
+
+/* agenda */
+.agenda{list-style:none;margin:0;padding:0;display:grid}
+.agenda li{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line)}
+.agenda li:first-child{border-top:1px solid var(--line)}
+.agenda .d{font-family:var(--f-mono);font-size:.8rem;color:var(--accent-text);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.agenda li.brk{color:var(--muted)}
+.agenda li.brk .d{color:var(--muted);font-weight:500}
+
+/* roles */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.panel{border-radius:var(--r);padding:22px 24px;display:flex;flex-direction:column;gap:12px}
+.panel.you{background:var(--accent-soft)}
+.panel.us{background:var(--surface);border:1px solid var(--line)}
+.panel ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+
+/* overview journey */
+.toggle{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:4px;background:var(--surface);gap:4px;flex-wrap:wrap}
+.toggle button{border:0;background:transparent;padding:6px 16px;border-radius:99px;font-size:.9rem;font-weight:600}
+.toggle button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.overview{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;counter-reset:ov}
+.ov{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px;counter-increment:ov}
+.ov::before{content:counter(ov);font-family:var(--f-mono);font-size:.78rem;font-weight:700;color:var(--accent-text);width:26px;height:26px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center}
+.ov p{font-size:.9rem;color:var(--muted)}
+.ov .go{margin-top:auto;padding-top:6px;background:none;border:0;padding-left:0;text-align:left;color:var(--accent-text);font-weight:650;font-size:.85rem}
+.ov .go:hover{text-decoration:underline}
+
+/* switches */
+.switches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.switches{grid-template-columns:1fr}}
+.switch{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:start}
+.pill{width:38px;height:22px;border-radius:99px;background:var(--ok);position:relative;margin-top:2px}
+.pill::after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.switch p{grid-column:2;color:var(--muted);font-size:.93rem}
+
+/* decisions */
+.decisions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.decisions{grid-template-columns:1fr}}
+.decision{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.decision .q{font-family:var(--f-mono);font-size:.75rem;color:var(--accent-text);font-weight:700}
+.decision p{font-size:.95rem;color:var(--muted)}
+.nl{font-size:.86rem;color:var(--muted);background:var(--surface2);border-radius:8px;padding:8px 12px}
+.nl b{color:var(--fg)}
+.decision label,.polly label{font-size:.85rem}
+.decision textarea,.polly textarea{min-height:64px}
+.polly{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 24px;align-items:start}
+@media (max-width:760px){.polly{grid-template-columns:1fr}}
+.polly .txt{display:flex;flex-direction:column;gap:10px}
+.polly .txt p{color:var(--muted);font-size:.95rem}
+.polly .fields{display:flex;flex-direction:column;gap:12px}
+.check{flex-direction:row;align-items:center;gap:10px;font-weight:650}
+.check input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.btn.solid{background:var(--accent);color:var(--accent-fg);text-decoration:none;align-self:flex-start}
+.btn.solid:hover{opacity:.9;background:var(--accent)}
+.export-bar{display:flex;flex-wrap:wrap;gap:10px}
+/* phone numbers */
+.numsteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:ns}
+@media (max-width:820px){.numsteps{grid-template-columns:1fr}}
+.numsteps li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:10px;counter-increment:ns}
+.numsteps li::before{content:"Step " counter(ns);font-family:var(--f-mono);font-size:.75rem;font-weight:700;color:var(--accent-text)}
+.numsteps p{color:var(--muted);font-size:.93rem}
+.nums{display:flex;flex-direction:column;gap:6px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
+.nrow{display:flex;justify-content:space-between;gap:10px;font-size:.84rem}
+.nrow span:first-child{color:var(--muted)}
+.nrow b{font-weight:650;text-align:right}
+/* gantt */
+.gantt-wrap{overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
+.gantt{min-width:820px;padding:16px 20px 20px}
+.g-row{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;min-height:66px;border-bottom:1px dashed var(--line)}
+.g-row:last-child{border-bottom:0}
+.g-head{min-height:28px;border-bottom:1px solid var(--line)}
+.g-lab{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.g-track{position:relative;height:100%;min-height:inherit}
+.g-track > i{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.g-months span{position:absolute;top:4px;font-family:var(--f-mono);font-size:.75rem;font-weight:700;color:var(--muted);padding-left:6px}
+.g-bar{position:absolute;top:10px;padding-top:15px;display:flex;flex-direction:column;white-space:nowrap;min-width:6px;color:var(--fg)}
+.g-bar::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;border-radius:99px;background:var(--accent)}
+.g-bar b{font-size:.78rem;font-weight:650;line-height:1.2}
+.g-bar small{font-size:.7rem;color:var(--muted);font-family:var(--f-mono)}
+.g-bar.alt::before{background:var(--lav)}
+.g-bar.num::before{background:repeating-linear-gradient(90deg,var(--accent) 0 8px,transparent 8px 12px)}
+.g-bar.num2::before{background:var(--warn-line)}
+.g-bar.num3::before{background:var(--ok)}
+.g-ms-row{min-height:84px}
+.g-ms{position:absolute;top:8px;transform:translateX(-7px);display:flex;flex-direction:column;gap:1px;white-space:nowrap}
+.g-ms.low{top:34px}
+.g-ms span{width:14px;height:14px;transform:rotate(45deg);background:var(--navy);border:2px solid var(--surface);outline:1.5px solid var(--navy)}
+:root[data-theme="dark"] .g-ms span{background:var(--lav);outline-color:var(--lav)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .g-ms span{background:var(--lav);outline-color:var(--lav)}}
+.g-ms.now span{background:var(--accent);outline-color:var(--accent)}
+.g-ms b{font-size:.75rem;margin-top:3px}
+.g-ms small{font-size:.7rem;font-family:var(--f-mono);color:var(--muted)}
+/* line timeline */
+.lt{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0 14px}
+.lt li{position:relative;display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.lt-date{font-family:var(--f-mono);font-size:.8rem;font-weight:700;color:var(--accent-text);white-space:nowrap}
+.lt-dot{position:relative;height:22px;margin:4px 0 6px}
+.lt-dot::before{content:"";position:absolute;left:0;right:-14px;top:10px;height:3px;background:var(--line)}
+.lt li:last-child .lt-dot::before{right:0}
+.lt-dot::after{content:"";position:absolute;left:0;top:3px;width:16px;height:16px;border-radius:50%;background:var(--surface);border:3px solid var(--accent)}
+.lt li.now .lt-dot::after{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.lt li.warn .lt-dot::after{border-color:var(--warn-line)}
+.lt li.ok .lt-dot::after{background:var(--ok);border-color:var(--ok)}
+.lt b{font-family:var(--f-display);font-size:1.02rem}
+.lt p{color:var(--muted);font-size:.88rem}
+.lt dl{margin:6px 0 0;display:grid;gap:2px;font-size:.84rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.lt dt{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.lt dd{margin:0 0 6px;font-weight:600}
+.lt dd:last-child{margin-bottom:0}
+@media (max-width:860px){
+ .lt{grid-template-columns:1fr;gap:0}
+ .lt li{padding:0 0 18px 30px}
+ .lt-dot{position:absolute;left:0;top:0;bottom:0;height:auto;margin:0;width:16px}
+ .lt-dot::before{left:6px;right:auto;width:3px;height:auto;top:4px;bottom:0}
+ .lt li:last-child .lt-dot::before{display:none}
+}
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;max-width:820px}
+.tl li{display:grid;grid-template-columns:150px 22px minmax(0,1fr);gap:0 14px;position:relative}
+.tl .when{font-family:var(--f-mono);font-size:.8rem;font-weight:700;color:var(--accent-text);padding:14px 0;text-align:right}
+.tl .dot{position:relative}
+.tl .dot::before{content:"";position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--line)}
+.tl li:first-child .dot::before{top:20px}
+.tl li:last-child .dot::before{bottom:calc(100% - 20px)}
+.tl .dot::after{content:"";position:absolute;left:4px;top:15px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.tl li.now .dot::after{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.tl li.ms .dot::after{background:var(--ok);border-color:var(--ok)}
+.tl .what{padding:12px 0 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.tl li:last-child .what{border-bottom:0}
+.tl .what b{font-size:.98rem}
+.tl .what span{color:var(--muted);font-size:.9rem}
+@media (max-width:560px){.tl li{grid-template-columns:22px minmax(0,1fr)}.tl .when{grid-column:2;text-align:left;padding:12px 0 0}.tl .dot{grid-row:1/3;grid-column:1}.tl .what{grid-column:2;padding-top:2px}}
+
+/* ===== Flow studio ===== */
+.studio{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.studio{grid-template-columns:minmax(0,1fr)}}
+.scen-list{position:sticky;top:calc(72px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+@media (max-width:900px){.scen-list{position:static;flex-direction:row;overflow-x:auto;padding:8px}}
+.scen-group{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:8px 8px 2px}
+@media (max-width:900px){.scen-group{display:none}}
+.scen{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;text-align:left;border:0;background:transparent;border-radius:10px;padding:9px 10px;flex:none}
+.scen:hover{background:var(--surface2)}
+.scen.on{background:var(--accent-soft)}
+.scen.on b{color:var(--accent-text)}
+.scen b{font-size:.92rem;font-weight:650;line-height:1.25}
+.scen small{grid-column:1;font-size:.78rem;color:var(--muted);line-height:1.3}
+.scen .cnt{grid-row:1/3;grid-column:2;font-family:var(--f-mono);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.scen .cnt.done{background:var(--ok-bg);color:var(--ok)}
+@media (max-width:900px){.scen small{display:none}.scen{white-space:nowrap}}
+
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px clamp(14px,3vw,32px) 32px;min-width:0}
+.dg-head{display:flex;flex-direction:column;gap:6px;padding-bottom:18px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+.dg-head p{color:var(--muted);max-width:64ch}
+.dg-legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--muted);padding-top:6px}
+.dg-legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{width:14px;height:14px;border-radius:4px;display:inline-block}
+.lg.c{background:var(--surface2);border:1.5px solid var(--lav);transform:rotate(45deg) scale(.8)}
+.lg.p{background:var(--surface);border:2px solid var(--accent)}
+.lg.s{background:var(--ok)}
+.lg.e{background:var(--navy);border-radius:99px}
+
+.flow{display:flex;flex-direction:column;align-items:center;gap:26px;width:100%}
+.flow > *{position:relative;width:100%;max-width:560px}
+.flow > * + *::before{content:"";position:absolute;left:50%;top:-26px;height:26px;width:2px;background:var(--line);transform:translateX(-1px)}
+.flow > * + *::after{content:"";position:absolute;left:50%;top:-8px;border:5px solid transparent;border-top-color:var(--muted);transform:translateX(-5px);opacity:.6}
+
+.fn-start{display:flex;justify-content:center}
+.fn-start span{display:inline-flex;gap:8px;align-items:center;border:2px solid var(--fg);border-radius:99px;padding:7px 16px;font-weight:650;font-size:.92rem;background:var(--surface)}
+.fn-check{background:var(--surface2);border:1.5px solid var(--lav);border-radius:12px;padding:12px 16px;display:grid;gap:8px}
+.fn-check .k{font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--accent-text);display:flex;align-items:center;gap:6px}
+.fn-check .k::before{content:"";width:9px;height:9px;border:1.5px solid var(--accent-text);transform:rotate(45deg)}
+.fn-check b{font-family:var(--f-display);font-size:1.02rem}
+.outs{display:flex;flex-wrap:wrap;gap:6px}
+.out{font-size:.8rem;padding:3px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line)}
+.out.here{border-color:var(--accent);color:var(--accent-text);font-weight:650}
+.out button{border:0;background:none;padding:0;color:var(--accent-text);font-weight:650;text-decoration:underline;font-size:inherit}
+.fn-switch{display:flex;gap:10px;align-items:center;justify-content:center;font-size:.88rem;font-weight:600;color:var(--ok)}
+.fn-switch .pill{transform:scale(.8);margin:0}
+.fn-sys{text-align:center;font-size:.86rem;color:var(--muted);font-style:italic;border:1px dashed var(--line);border-radius:10px;padding:8px 12px}
+.fn-end{display:flex;justify-content:center}
+.fn-end span{background:var(--navy);color:#fff;border-radius:99px;padding:8px 18px;font-weight:650;font-size:.9rem}
+.fn-end.agent span{background:var(--ok);color:#fff}
+:root[data-theme="dark"] .fn-end span{background:#2C3E66}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fn-end span{background:#2C3E66}}
+:root .fn-end.agent span{background:var(--ok)}
+.fn-end.agent span{color:var(--surface)}
+
+.fn-prompt{background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:14px 16px 16px;display:grid;gap:8px;box-shadow:0 4px 14px rgba(79,34,215,.08)}
+.fn-prompt.filled{border-color:var(--ok)}
+.fp-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fp-head .ic{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;flex:none}
+.fn-prompt.filled .fp-head .ic{background:var(--ok)}
+.fp-head .ic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fp-head b{font-family:var(--f-display);font-size:1rem}
+.fp-key{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);margin-left:auto}
+.fp-cond{font-size:.72rem;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:99px;padding:1px 8px}
+.fp-when{font-size:.86rem;color:var(--muted)}
+.fp-ex{font-size:.86rem;color:var(--muted);font-style:italic;border-left:3px solid var(--lav);padding-left:10px}
+.fn-prompt textarea{font:inherit;font-size:.95rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-height:70px;resize:vertical;line-height:1.5}
+.fn-prompt textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.fp-shared{font-size:.75rem;color:var(--muted)}
+
+.branch{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:16px;max-width:none!important;padding-top:14px;border-top:2px solid var(--line)}
+.branch > .br{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
+.br-l{font-family:var(--f-mono);font-size:.78rem;font-weight:700;background:var(--accent);color:var(--accent-fg);border-radius:99px;padding:3px 12px;text-align:center}
+.br .flow > *{max-width:none}
+@media (max-width:640px){.branch{grid-template-columns:minmax(0,1fr)}}
+
+.scen-note{margin-top:22px}
+
+/* worksheets */
+.sheet{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--accent);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow)}
+.sheet-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.sheet-id{font-family:var(--f-mono);font-size:.78rem;color:var(--accent-text);font-weight:700;letter-spacing:.06em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:6px;font-weight:650;font-size:.92rem}
+label small{font-weight:400;color:var(--muted)}
+input[type=text],textarea,select{font:inherit;font-weight:400;font-size:.95rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+textarea{min-height:76px;resize:vertical;line-height:1.5}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+::placeholder{color:var(--muted);opacity:.75}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.92rem}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:700;padding:10px;background:var(--surface2);border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td input,td select{padding:7px 8px;font-size:.9rem}
+td.ex{color:var(--muted);font-style:italic;padding:12px 10px}
+tr.moves td{background:var(--warn-bg)}
+tr.moves td.flag::after{content:"Set again every year";display:block;margin-top:4px;font-size:.72rem;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.03em}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--accent);background:transparent;color:var(--accent-text);padding:8px 16px;border-radius:99px;font-weight:650;font-size:.9rem}
+.btn:hover{background:var(--accent-soft)}
+
+/* tips */
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;list-style:none;padding:0;margin:0}
+.tips li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:4px}
+.tips li b{font-family:var(--f-display);font-size:1.02rem}
+.tips li span{color:var(--muted);font-size:.93rem}
+.tips li em{font-style:normal;font-family:var(--f-mono);font-size:.8rem;color:var(--accent-text)}
+.tips-head{display:grid;gap:6px}
+
+/* next */
+.after{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;counter-reset:af}
+.after li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px;counter-increment:af}
+.after li::before{content:counter(af);font-family:var(--f-mono);font-weight:700;color:var(--accent-fg);background:var(--accent);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.8rem}
+.after span{color:var(--muted);font-size:.92rem}
+.open-q{margin:6px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+#exportBox{width:100%;min-height:240px;font-family:var(--f-mono);font-size:.8rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="data:image/png;base64,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" alt="ContactRC">
+  <span class="sep" aria-hidden="true"></span>
+  <nav aria-label="Sections">
+    <a href="#agenda">Agenda</a><a href="#decisions">Setup</a><a href="#how">How it works</a><a href="#flows">Call flows</a><a href="#sheets">Worksheets</a><a href="#numbers">Phases</a>
+  </nav>
+  <span class="status" id="saveStatus">Export your notes before closing</span>
+  <button class="tb-btn" id="exportBtn" type="button">Export notes</button>
+</header>
+
+<div class="main"><div class="page">
+
+  <div class="hero">
+    <span class="eyebrow">ContactRC · Amazon Connect</span>
+    <h1>Workshop ContactRC setup</h1>
+    <p class="lede">ContactRC is the IFRC contact center, built with support from the Netherlands Red Cross. It runs on Amazon Connect. People call one number and your team answers from a browser.</p>
+    <p class="lede">Today we decide what your contact center setup is and write what callers hear. You know your callers; we help you configure the system. No technical knowledge is needed.</p>
+    <dl>
+      <div><dt>National Society</dt><dd><input type="text" id="ns_name" placeholder="Name of your National Society" aria-label="National Society"></dd></div>
+    </dl>
+  </div>
+
+  <!-- AGENDA -->
+  <section id="agenda">
+    <div class="sec-head col">
+      <span class="eyebrow">The session</span>
+      <h2>Agenda</h2>
+      <p class="lead">We fill everything in live. A first draft is good enough: you can change every text later, and you will hear and test all of it before anything goes live.</p>
+    </div>
+    <ol class="agenda col">
+      <li><span><b>Welcome</b></span><span class="d">15 min</span></li>
+      <li><span><b>Your setup</b></span><span class="d">25 min</span></li>
+      <li><span><b>How a call works</b></span><span class="d">20 min</span></li>
+      <li class="brk"><span>Break</span><span class="d">10 min</span></li>
+      <li><span><b>Write the call flows</b></span><span class="d">80 min</span></li>
+      <li><span><b>Your team</b></span><span class="d">15 min</span></li>
+      <li><span><b>Wrap up</b></span><span class="d">15 min</span></li>
+    </ol>
+  </section>
+
+  <!-- DECISIONS -->
+  <section id="decisions">
+    <div class="sec-head col">
+      <span class="eyebrow">Your setup</span>
+      <h2>Three choices that shape your contact center</h2>
+      <p class="lead">We make these first. They decide which flows you need and how many messages you write. Write down what you decide in the note under each choice.</p>
+    </div>
+    <div class="decisions">
+      <div class="decision exp-group" data-title="Decision 1: Languages">
+        <span class="q">DECISION 1</span><h3>How many languages?</h3>
+        <p>One language keeps it simple: no language menu and one set of messages. Every extra language adds complexity: a language menu, every message written, translated and checked in each language, and agents who can answer in that language.</p>
+        <p class="nl"><b>Netherlands:</b> Dutch is the default language; English, Arabic and Turkish are in the menu.</p>
+        <label for="d1_note">Our choice<textarea id="d1_note" aria-label="Our choice" placeholder="e.g. Polish default, English in the menu"></textarea></label>
+      </div>
+      <div class="decision exp-group" data-title="Decision 2: Login">
+        <span class="q">DECISION 2</span><h3>How does your team log in?</h3>
+        <p>We propose user accounts managed in AWS (IAM). If you have a strong reason to use your own login system instead, tell us today.</p>
+        <p class="nl"><b>Proposal:</b> AWS IAM accounts, unless you strongly prefer otherwise.</p>
+        <label for="d2_note">Our choice<textarea id="d2_note" aria-label="Our choice" placeholder="e.g. AWS IAM accounts"></textarea></label>
+      </div>
+      <div class="decision exp-group" data-title="Decision 3: Recording and data">
+        <span class="q">DECISION 3</span><h3>Do you record calls?</h3>
+        <p>Recording helps with quality and training, but it has privacy consequences. Decide this with your data protection officer.</p>
+        <p>Attachments are kept for 24 hours, then deleted.</p>
+        <p class="nl"><b>Netherlands:</b> calls are recorded.</p>
+        <label for="d3_note">Our choice<textarea id="d3_note" aria-label="Our choice" placeholder="e.g. no recording; DPO informed"></textarea></label>
+      </div>
+      <div class="decision exp-group" data-title="Computer voice (Amazon Polly)">
+        <span class="q">CHECK</span><h3>Do you agree with the computer voice?</h3>
+        <p>All messages are spoken by the computer voice, Amazon Polly. Together we listen to it in your languages and you confirm it is good enough.</p>
+        <p><a href="https://eu-central-1.console.aws.amazon.com/polly/home?region=eu-central-1" target="_blank" rel="noopener">Open Amazon Polly</a> (log in to AWS first)</p>
+        <label class="check" for="v_ok"><input type="checkbox" id="v_ok" aria-label="National Society agrees with the computer voice">We agree with the computer voice</label>
+        <label for="v_note">Voice and notes per language<textarea id="v_note" aria-label="Voice and notes per language" placeholder="e.g. Polish: sounds fine; check pronunciation of place names"></textarea></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHONE NUMBERS -->
+  <section id="numbers">
+    <div class="sec-head col">
+      <span class="eyebrow">Phases</span>
+      <h2>Which system and which number, when</h2>
+    </div>
+    <ol class="lt"><li class="now"><span class="lt-date">16 Oct 2026</span><span class="lt-dot" aria-hidden="true"></span><b>Workshop</b><p>We decide the setup and write the messages.</p><dl><dt>System</dt><dd>Current system, as today</dd><dt>Phone number</dt><dd>Current number, as today</dd></dl></li><li class=""><span class="lt-date">17 Nov 2026</span><span class="lt-dot" aria-hidden="true"></span><b>First version</b><p>510 tests internally, until 27 Nov.</p><dl><dt>System</dt><dd>Test environment</dd><dt>Phone number</dt><dd>Test number</dd></dl></li><li class=""><span class="lt-date">7–11 Dec 2026</span><span class="lt-dot" aria-hidden="true"></span><b>User acceptance testing</b><p>Your team tests every scenario.</p><dl><dt>System</dt><dd>Test environment</dd><dt>Phone number</dt><dd>Test number</dd></dl></li><li class="warn"><span class="lt-date">Jan–Feb 2027</span><span class="lt-dot" aria-hidden="true"></span><b>Pilot</b><p>Live in one area. Calls out only with the test number.</p><dl><dt>System</dt><dd>Production (PCK)</dd><dt>Phone number</dt><dd>Current number, forwarded to the new account</dd></dl></li><li class="ok"><span class="lt-date">After pilot</span><span class="lt-dot" aria-hidden="true"></span><b>Number moved over</b><p>The new system is accepted for production.</p><dl><dt>System</dt><dd>Production (PCK)</dd><dt>Phone number</dt><dd>Original number, in and out. Test number stays for tests.</dd></dl></li></ol>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="sec-head col">
+      <span class="eyebrow">How it works</span>
+      <h2>Every call passes the same checks, in this order</h2>
+      <p class="lead">At each step the system uses something you give us: a message, an opening time, a list. Choose one or several languages to see what changes. Each step links to its call flow further down.</p>
+    </div>
+    <div class="toggle" role="group" aria-label="Number of languages">
+      <button type="button" id="langOne" aria-pressed="false">One language</button>
+      <button type="button" id="langMulti" aria-pressed="true">Several languages</button>
+    </div>
+    <ol class="overview" id="overview"></ol>
+    <div class="callout col"><span><b>One call at a time.</b> A team member handles one call at a time. The caller's earlier contacts show on screen, so nobody has to tell their story twice.</span></div>
+  </section>
+
+  <!-- SWITCHES -->
+  <section id="switches">
+    <div class="sec-head col">
+      <span class="eyebrow">For your information</span>
+      <h2>Four switches your supervisors control</h2>
+      <p class="lead">Supervisors can turn these on or off themselves, at any moment. There is nothing to decide today.</p>
+    </div>
+    <div class="switches">
+      <div class="switch"><div class="pill" aria-hidden="true"></div><h4>Emergency closure</h4><p>Close the line immediately, for example during an evacuation or an outage. Callers hear the emergency message.</p></div>
+      <div class="switch"><div class="pill" aria-hidden="true"></div><h4>Temporary message</h4><p>Add a short announcement before the queue. Useful when many people call about the same thing.</p></div>
+      <div class="switch"><div class="pill" aria-hidden="true"></div><h4>Callback</h4><p>Offer or stop offering callbacks on a long wait. When a callback is offered is fixed.</p></div>
+      <div class="switch"><div class="pill" aria-hidden="true"></div><h4>Survey</h4><p>Turn the satisfaction survey after the call on or off.</p></div>
+    </div>
+  </section>
+
+  <!-- FLOWS -->
+  <section id="flows">
+    <div class="sec-head col">
+      <span class="eyebrow">Call flows · Sheet A</span>
+      <h2>Write what callers hear, scenario by scenario</h2>
+      <p class="lead">Each scenario shows one path through the call. Write your text in the purple boxes, in one working language. Translation comes after the workshop. A message that appears in several scenarios is shared: write it once and it fills in everywhere. <b>[X]</b> marks a value the system says for you, such as the wait time.</p>
+    </div>
+    <div class="tips-head">
+      <h3>While writing: write for the ear, not the eye</h3>
+      <p class="muted">You already know how to talk to people in difficult situations. These tips are specific to phone messages.</p>
+    </div>
+    <ul class="tips">
+      <li><b>Read it out loud</b><span>If it sounds stiff when you say it, it sounds worse from a computer voice. We play each message in the computer voice to check.</span></li>
+      <li><b>Most important first</b><span>Callers stop listening after the first sentence. Lead with what they need to know or do.</span></li>
+      <li><b>Option before number</b><span>People wait for their option, then listen for the key.</span><em>"For Arabic, press 3."</em></li>
+      <li><b>Short and one idea</b><span>Aim for under 15 seconds per message. No more than four menu options.</span></li>
+      <li><b>No promises you cannot keep</b><span>Avoid "shortly" or "today" unless that is true every time.</span></li>
+      <li><b>Always a next step</b><span>When you are closed, say when you open and where else people can find help.</span></li>
+    </ul>
+    <div class="studio">
+      <nav class="scen-list" id="scenList" aria-label="Scenarios"></nav>
+      <div class="diagram" id="diagram" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- WORKSHEETS -->
+  <section id="sheets">
+    <div class="sec-head col">
+      <span class="eyebrow">Worksheets</span>
+      <h2>Everything else we need from you</h2>
+      <p class="lead">Grey italic text is an example. Use <b>Export notes</b> at the top to download or copy all notes, decisions and call flows in one go. Do this before you close the page.</p>
+    </div>
+
+    <div class="sheet exp-group" data-title="Languages and hours">
+      <div class="sheet-head"><h3>Languages and hours</h3><span class="sheet-id">SHEET B</span></div>
+      <div class="grid2">
+        <label for="b_langs">Languages, in menu order<small>Leave one language if you need no menu</small><input type="text" id="b_langs" placeholder="e.g. 1 French, 2 English, 3 Arabic"></label>
+        <label for="b_default">Default language<small>Used when a caller presses nothing</small><input type="text" id="b_default" placeholder="e.g. French"></label>
+      </div>
+      <h4>Opening hours</h4>
+      <div class="tbl"><table>
+        <thead><tr><th>Day</th><th>Opens</th><th>Closes</th><th>Notes</th></tr></thead>
+        <tbody id="hoursBody">
+          <tr><td class="ex">Example</td><td class="ex">09:00</td><td class="ex">17:00</td><td class="ex">Lunch break not closed</td></tr>
+        </tbody>
+      </table></div>
+      <h4>Public holidays for the next 12 months</h4>
+      <p class="muted">Include religious holidays your team observes. Mark whether the holiday falls on the same date every year. If the date changes (for example Easter or Eid), you need to set it again yourself every year.</p>
+      <div class="tbl"><table id="holTable">
+        <thead><tr><th>Date</th><th>Holiday</th><th>Same date every year?</th></tr></thead>
+        <tbody>
+          <tr><td class="ex">25 Dec</td><td class="ex">Christmas Day</td><td class="ex">Yes, fixed date</td></tr>
+        </tbody>
+      </table></div>
+      <div><button class="btn" type="button" id="addHol">Add a holiday</button></div>
+      <div class="grid2">
+        <label for="b_block" class="full">Who decides to block a number, and when?<textarea id="b_block" placeholder="e.g. supervisor, after two abusive calls, noted in the incident register"></textarea></label>
+      </div>
+    </div>
+
+    <div class="sheet exp-group" data-title="Your team">
+      <div class="sheet-head"><h3>Your team</h3><span class="sheet-id">SHEET C</span></div>
+      <p class="muted">Everyone who will log in.</p>
+      <div class="tbl"><table id="userTable">
+        <thead><tr><th>Full name</th><th>Work email</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td class="ex">Amina Diallo</td><td class="ex">amina.diallo@ns.org</td><td class="ex">Agent</td></tr>
+        </tbody>
+      </table></div>
+      <div><button class="btn" type="button" id="addRow">Add a row</button></div>
+      <div class="callout"><span><b>Roles.</b> <b>Agent</b> answers calls. <b>Supervisor</b> also sees live numbers, listens in and uses the four switches. <b>Admin</b> manages users and settings, usually one or two people.</span></div>
+    </div>
+  </section>
+
+  <section id="exportSec" hidden>
+    <div class="sheet">
+      <div class="sheet-head"><h3>All notes</h3><button class="btn" type="button" id="closeExport">Close</button></div>
+      <div class="export-bar"><button class="btn solid" type="button" id="downloadBtn">Download as text file</button><button class="btn" type="button" id="copyBtn">Copy to clipboard</button></div>
+      <p class="muted" id="exportMsg">Download the file, or select the text below and copy it.</p>
+      <textarea id="exportBox" readonly aria-label="All answers"></textarea>
+    </div>
+  </section>
+
+</div></div>
+
+<script>
+(function(){
+  /* ---------- Message catalogue (voice only) ---------- */
+  var P = {
+    Main_Greeting:{t:"Welcome", w:"First thing every caller hears, before the language menu. Played in the default language, or the caller's language if we know it.", ex:"Welcome to the Red Cross helpline."},
+    Blocked:{t:"Blocked number", w:"Caller is on the blocked list.", ex:"We are unable to accept your call."},
+    Closed_Hours:{t:"Closed: outside opening hours", w:"Caller rings outside opening hours.", ex:"We are closed at the moment. We are open Monday to Friday from 9:00 to 17:00. Please call us again then."},
+    Closed_Holiday:{t:"Closed: public holiday", w:"Caller rings on a public holiday.", ex:"We are closed today for a public holiday. Please call us again on the next working day, from 9:00 to 17:00."},
+    Closed_Emergency:{t:"Closed: emergency", w:"A supervisor has switched on emergency closure.", ex:"We cannot take calls at the moment. Please try again later."},
+    Language_Choice:{t:"Language menu", w:"New callers only. Each option spoken in its own language.", ex:"For Dutch, press 1. For English, press 2. For Arabic, press 3. For Turkish, press 4.", multi:true},
+    No_Input:{t:"No key pressed", w:"Caller pressed nothing or a wrong key. The menu then plays again.", ex:"Sorry, I did not get your choice. Please try again.", multi:true},
+    Continue_Default:{t:"Continuing in default language", w:"Still no choice after the menu was repeated.", ex:"We will continue this call in Dutch.", multi:true},
+    Privacy_Message:{t:"Privacy notice", w:"What you do with the caller's information. Optional.", ex:"No example yet. Agree the text with your data protection officer."},
+    Temporary_Message:{t:"Temporary message", w:"Plays only while a supervisor has it switched on. You can write a new one at any time.", ex:"Payments for this month are delayed by one week. You do not need to call us about this."},
+    Survey_Intro:{t:"Survey invitation", w:"Early in the call, so the caller knows to stay on the line at the end.", ex:"At the end of this call, please stay on the line to answer two short questions about our service."},
+    Recording_Disclaimer:{t:"Recording notice", w:"Only if you record calls.", ex:"This call may be recorded for quality and training purposes."},
+    Queue_Entry:{t:"Joining the queue", w:"All team members are busy.", ex:"Thank you for calling. All our team members are helping other people. The next available person will be with you as soon as possible."},
+    EWT:{t:"Expected wait time", w:"Right after joining the queue.", ex:"Your expected waiting time is less than [X] minutes."},
+    Hold_Message:{t:"Still waiting", w:"Every 60 seconds, between hold music.", ex:"All our team members are still helping other people. Please stay on the line."},
+    Offer_Callback:{t:"Callback offer", w:"Expected wait is longer than the set limit, and it is not the last hour before closing.", ex:"The expected waiting time is [X] minutes. To keep your place and be called back, press 1. To keep waiting, press 2 or stay on the line."},
+    Callback_Scheduled:{t:"Callback confirmed", w:"Caller pressed 1 to be called back.", ex:"Your callback is set up. We will call you back on [your number]. The call will come from [our number], in about [X] minutes."},
+    Callback_Already_Scheduled:{t:"Callback already planned", w:"Caller rings again while a callback is still waiting.", ex:"You already have a callback planned. To cancel it and wait on the line, press 1. To keep your callback, press 2 or hang up."},
+    Callback_Return_To_Queue:{t:"Back to the queue", w:"Caller cancelled the callback to wait on the line.", ex:"Your callback is cancelled. We are returning you to the queue. Please wait for the next available person."},
+    Callback_Wait:{t:"Callback kept", w:"Caller keeps the existing callback.", ex:"We will call you back in about [X] minutes. Please look out for a call from [our number]."},
+    Survey_Q1:{t:"Survey: yes/no question", w:"After the team member ends the call.", ex:"Did we help you today? Press 1 for yes, press 2 for no."},
+    Survey_Q2:{t:"Survey: open question", w:"After the yes/no question.", ex:"What could we do better? Please tell us after the tone."},
+    Survey_Thanks:{t:"Thank you", w:"End of the survey.", ex:"Thank you for your feedback. Goodbye."}
+  };
+
+  /* ---------- Scenarios ---------- */
+  var S = [
+    {id:"normal", g:"Open", title:"A normal call", short:"Open, someone answers",
+     desc:"The most common path: the line is open, the caller chooses a language, hears the welcome and information, and reaches a team member.",
+     nodes:[
+      {start:"Someone calls your number"},
+      {p:"Main_Greeting"},
+      {check:"Is the number blocked?", outs:[["No","here"],["Yes","blocked"]]},
+      {check:"Are we open?", sub:"Opening hours, holidays, emergency closure", outs:[["Yes","here"],["Outside hours","closed"],["Holiday","holiday"],["Emergency","emergency"]]},
+      {check:"Do we know the caller's language?", outs:[["Yes: skip the menu","here"],["No","language"]], multi:true},
+      {p:"Privacy_Message", cond:"Optional"},
+      {p:"Temporary_Message", cond:"Only when switched on"},
+      {p:"Survey_Intro", cond:"Only when survey is on"},
+      {p:"Recording_Disclaimer", cond:"Only if you record"},
+      {check:"Is a team member free?", outs:[["Yes","here"],["No","queue"]]},
+      {end:"Connected to a team member", agent:true}
+     ]},
+    {id:"language", g:"Open", title:"Choosing a language", short:"Menu, no input, default", multi:true,
+     desc:"New callers choose a language. Returning callers skip this: the system remembers their choice.",
+     nodes:[
+      {start:"New caller, language unknown"},
+      {p:"Language_Choice"},
+      {branch:[
+        {l:"Presses a key", nodes:[{sys:"Language saved for next time"},{end:"Call continues in that language"}]},
+        {l:"Nothing or wrong key", nodes:[{p:"No_Input"},{sys:"Menu plays again"},{p:"Continue_Default"},{end:"Call continues in default language"}]}
+      ]}
+     ]},
+    {id:"temporary", g:"Open", title:"Temporary message", short:"Supervisor announcement",
+     desc:"For news many callers ask about. A supervisor switches it on and off, and can change the text without 510.",
+     nodes:[
+      {switchOn:"Supervisor switches on the temporary message"},
+      {start:"Caller passes welcome and privacy notice"},
+      {p:"Temporary_Message"},
+      {end:"Call continues as normal"}
+     ]},
+    {id:"queue", g:"Waiting", title:"Waiting in the queue", short:"All team members busy",
+     desc:"Everyone is busy. The caller hears the expected wait and hold music, with a reminder every minute.",
+     nodes:[
+      {start:"No team member free"},
+      {p:"Queue_Entry"},
+      {p:"EWT"},
+      {check:"Wait longer than the callback limit?", outs:[["No","here"],["Yes","callback"]]},
+      {sys:"Hold music, 60 seconds"},
+      {p:"Hold_Message"},
+      {sys:"Repeats until someone is free"},
+      {end:"Connected to a team member", agent:true}
+     ]},
+    {id:"callback", g:"Waiting", title:"Callback offered", short:"Long wait, keep your place",
+     desc:"When the wait is long, the caller can hang up and keep their place. The system calls them back as soon as a team member is free.",
+     nodes:[
+      {switchOn:"Callback switch is on"},
+      {check:"Wait longer than the set limit, and not the last hour before closing?", outs:[["Yes","here"],["No","queue"]]},
+      {p:"Offer_Callback"},
+      {branch:[
+        {l:"Presses 1", nodes:[{p:"Callback_Scheduled"},{end:"Caller hangs up"},{sys:"Team member is free: system calls the caller back"},{end:"Connected to a team member", agent:true}]},
+        {l:"Presses 2 or waits", nodes:[{end:"Stays in the queue"}]}
+      ]}
+     ]},
+    {id:"callback2", g:"Waiting", title:"Calling again with a callback planned", short:"Cancel or keep",
+     desc:"The caller already asked for a callback and rings again. They choose to wait on the line or keep the callback.",
+     nodes:[
+      {start:"Caller with a planned callback rings again"},
+      {p:"Callback_Already_Scheduled"},
+      {branch:[
+        {l:"Presses 1: cancel", nodes:[{p:"Callback_Return_To_Queue"},{end:"Back in the queue"}]},
+        {l:"Presses 2 or hangs up", nodes:[{p:"Callback_Wait"},{end:"Call ends, callback stays"}]}
+      ]}
+     ]},
+    {id:"closed", g:"Closed", title:"Outside opening hours", short:"Evenings and weekends",
+     desc:"The caller rings when you are closed. They hear when to call again, and the call ends. No callback is offered.",
+     nodes:[
+      {start:"Someone calls outside opening hours"},
+      {p:"Main_Greeting"},
+      {check:"Are we open?", outs:[["No: outside hours","here"]]},
+      {p:"Closed_Hours"},
+      {end:"Call ends"}
+     ]},
+    {id:"holiday", g:"Closed", title:"Public holiday", short:"Closed for the day",
+     desc:"On a date from your holiday list, callers hear the holiday message.",
+     nodes:[
+      {start:"Someone calls on a public holiday"},
+      {p:"Main_Greeting"},
+      {check:"Is today on the holiday list?", outs:[["Yes","here"]]},
+      {p:"Closed_Holiday"},
+      {end:"Call ends"}
+     ]},
+    {id:"emergency", g:"Closed", title:"Emergency closure", short:"Line closed at once",
+     desc:"For situations where the team cannot answer: an evacuation, an outage, a security incident.",
+     nodes:[
+      {switchOn:"Supervisor switches on emergency closure"},
+      {start:"Someone calls"},
+      {p:"Main_Greeting"},
+      {p:"Closed_Emergency"},
+      {end:"Call ends"}
+     ]},
+    {id:"blocked", g:"Closed", title:"Blocked caller", short:"Number on the blocked list",
+     desc:"Callers who have been abusive towards your team can be blocked. Keep the message short and neutral.",
+     nodes:[
+      {start:"A blocked number calls"},
+      {p:"Main_Greeting"},
+      {check:"Is the number blocked?", outs:[["Yes","here"]]},
+      {p:"Blocked"},
+      {end:"Call ends"}
+     ]},
+    {id:"survey", g:"After the call", title:"Survey after the call", short:"Two questions",
+     desc:"One yes/no question and one open question, after the team member ends the call.",
+     nodes:[
+      {switchOn:"Survey switch is on"},
+      {start:"Call starts"},
+      {p:"Survey_Intro"},
+      {sys:"Conversation with the team member"},
+      {p:"Survey_Q1"},
+      {p:"Survey_Q2"},
+      {p:"Survey_Thanks"},
+      {end:"Call ends"}
+     ]}
+  ];
+
+  /* ---------- Overview steps ---------- */
+  var OV = [
+    {t:"Welcome", d:"Every caller hears your welcome first.", go:"normal"},
+    {t:"Blocked?", d:"Blocked numbers hear one message and the call ends.", go:"blocked"},
+    {t:"Open?", d:"Opening hours, public holidays and the emergency switch.", go:"closed"},
+    {t:"Language", d:"New callers choose; returning callers are recognised.", go:"language", multi:true},
+    {t:"Information", d:"Privacy, recording notice, temporary message, survey invitation.", go:"normal"},
+    {t:"Queue", d:"Expected wait and hold music, with a reminder every minute.", go:"queue"},
+    {t:"Callback", d:"On a long wait, the caller can be called back instead.", go:"callback"},
+    {t:"Survey", d:"Two short questions after the call.", go:"survey"}
+  ];
+
+  var ICON_MIC = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+  var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+
+  /* ---------- Storage ---------- */
+  var KEY="contactrc-workshop-v2", store={};
+  try{ store = JSON.parse(localStorage.getItem(KEY)||"{}") || {}; }catch(e){ store={}; }
+  var statusEl = document.getElementById("saveStatus");
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(store)); statusEl.textContent="Export your notes before closing"; }
+    catch(e){ statusEl.textContent="Export your notes before closing"; }
+  }
+  var multi = store.__lang !== "one";
+  var current = store.__scen || "normal";
+
+  /* ---------- Render overview ---------- */
+  function renderOverview(){
+    var ol = document.getElementById("overview");
+    ol.innerHTML = OV.filter(function(o){ return multi || !o.multi; }).map(function(o){
+      return '<li class="ov"><h4>'+o.t+'</h4><p>'+o.d+'</p><button type="button" class="go" data-go="'+o.go+'">See the flow →</button></li>';
+    }).join("");
+  }
+
+  /* ---------- Render flow ---------- */
+  function scenById(id){ for(var i=0;i<S.length;i++) if(S[i].id===id) return S[i]; return null; }
+  function nodeHtml(n, sid){
+    if(n.multi && !multi) return "";
+    if(n.start) return '<div class="fn-start"><span>'+esc(n.start)+'</span></div>';
+    if(n.switchOn) return '<div class="fn-switch"><span class="pill" aria-hidden="true"></span>'+esc(n.switchOn)+'</div>';
+    if(n.sys) return '<div class="fn-sys">'+esc(n.sys)+'</div>';
+    if(n.end) return '<div class="fn-end'+(n.agent?' agent':'')+'"><span>'+esc(n.end)+'</span></div>';
+    if(n.check){
+      var outs = n.outs.map(function(o){
+        if(o[1]==="here") return '<span class="out here">'+esc(o[0])+' ↓</span>';
+        var target = scenById(o[1]);
+        if(!target || (target.multi && !multi)) return '<span class="out">'+esc(o[0])+'</span>';
+        return '<span class="out">'+esc(o[0])+' → <button type="button" data-go="'+o[1]+'">'+esc(target.title)+'</button></span>';
+      }).join("");
+      return '<div class="fn-check"><span class="k">Check</span><b>'+esc(n.check)+'</b>'+(n.sub?'<span class="muted" style="font-size:.85rem">'+esc(n.sub)+'</span>':'')+'<div class="outs">'+outs+'</div></div>';
+    }
+    if(n.p){
+      var m = P[n.p]; if(m.multi && !multi) return "";
+      var shared = S.filter(function(s){ return s.id!==sid && JSON.stringify(s.nodes).indexOf('"p":"'+n.p+'"')>-1 && (multi||!s.multi); }).length;
+      var val = store["p_"+n.p] || "";
+      return '<div class="fn-prompt'+(val.trim()?' filled':'')+'" data-key="'+n.p+'">'+
+        '<div class="fp-head"><span class="ic">'+ICON_MIC+'</span><b>'+esc(m.t)+'</b>'+(n.cond?'<span class="fp-cond">'+esc(n.cond)+'</span>':'')+'<span class="fp-key">'+n.p+'</span></div>'+
+        '<p class="fp-when">'+esc(m.w)+'</p>'+
+        '<p class="fp-ex">Example: '+esc(m.ex)+'</p>'+
+        '<label for="f_'+sid+'_'+n.p+'" style="font-weight:650;font-size:.85rem">Your text<textarea id="f_'+sid+'_'+n.p+'" data-key="'+n.p+'" placeholder="Write what callers will hear">'+esc(val)+'</textarea></label>'+
+        (shared?'<span class="fp-shared">Also used in '+shared+' other scenario'+(shared>1?'s':'')+'.</span>':'')+
+      '</div>';
+    }
+    if(n.branch){
+      return '<div class="branch" style="--n:'+n.branch.length+'">'+n.branch.map(function(b){
+        return '<div class="br"><span class="br-l">'+esc(b.l)+'</span><div class="flow">'+b.nodes.map(function(x){return nodeHtml(x,sid);}).join("")+'</div></div>';
+      }).join("")+'</div>';
+    }
+    return "";
+  }
+  function keysOf(s){
+    var out=[];
+    (function walk(ns){ ns.forEach(function(n){
+      if(n.multi && !multi) return;
+      if(n.p && !(P[n.p].multi && !multi) && out.indexOf(n.p)<0) out.push(n.p);
+      if(n.branch) n.branch.forEach(function(b){ walk(b.nodes); });
+    }); })(s.nodes);
+    return out;
+  }
+  function countFor(s){
+    var k=keysOf(s), done=k.filter(function(x){ return (store["p_"+x]||"").trim(); }).length;
+    return [done,k.length];
+  }
+  function renderList(){
+    var html="", lastG="";
+    S.forEach(function(s){
+      if(s.multi && !multi) return;
+      if(s.g!==lastG){ html+='<span class="scen-group">'+s.g+'</span>'; lastG=s.g; }
+      var c=countFor(s);
+      html+='<button type="button" class="scen'+(s.id===current?' on':'')+'" data-scen="'+s.id+'" aria-current="'+(s.id===current)+'"><b>'+esc(s.title)+'</b><small>'+esc(s.short)+'</small><span class="cnt'+(c[0]===c[1]?' done':'')+'">'+c[0]+'/'+c[1]+'</span></button>';
+    });
+    document.getElementById("scenList").innerHTML=html;
+  }
+  function renderDiagram(){
+    var s = scenById(current);
+    if(!s || (s.multi && !multi)){ current="normal"; s=scenById(current); }
+    var d = document.getElementById("diagram");
+    d.innerHTML = '<div class="dg-head"><span class="eyebrow">Scenario · '+esc(s.g)+'</span><h3 style="font-size:1.4rem">'+esc(s.title)+'</h3><p>'+esc(s.desc)+'</p>'+
+      '<div class="dg-legend"><span><i class="lg p"></i>Message you write</span><span><i class="lg c"></i>Check by the system</span><span><i class="lg s"></i>Supervisor switch</span><span><i class="lg e"></i>End of this path</span></div></div>'+
+      '<div class="flow">'+s.nodes.map(function(n){ return nodeHtml(n,s.id); }).join("")+'</div>';
+  }
+  function renderAll(){ renderOverview(); renderList(); renderDiagram(); }
+
+  function go(id, scroll){
+    current=id; store.__scen=id; save(); renderList(); renderDiagram();
+    if(scroll) document.getElementById("flows").scrollIntoView({behavior:"smooth"});
+  }
+  document.addEventListener("click", function(e){
+    var g = e.target.closest("[data-go]"); if(g){ go(g.getAttribute("data-go"), true); return; }
+    var sc = e.target.closest("[data-scen]"); if(sc){ go(sc.getAttribute("data-scen"), false); }
+  });
+  document.getElementById("diagram").addEventListener("input", function(e){
+    var t=e.target; if(!t.dataset || !t.dataset.key) return;
+    store["p_"+t.dataset.key]=t.value; save();
+    var box=t.closest(".fn-prompt"); if(box) box.classList.toggle("filled", !!t.value.trim());
+    renderList();
+  });
+
+  /* language toggle */
+  var bOne=document.getElementById("langOne"), bMulti=document.getElementById("langMulti");
+  function setLang(m){
+    multi=m; store.__lang = m?"multi":"one"; save();
+    bOne.setAttribute("aria-pressed", String(!m)); bMulti.setAttribute("aria-pressed", String(m));
+    renderAll();
+  }
+  bOne.addEventListener("click", function(){ setLang(false); });
+  bMulti.addEventListener("click", function(){ setLang(true); });
+  bOne.setAttribute("aria-pressed", String(!multi)); bMulti.setAttribute("aria-pressed", String(multi));
+
+  /* binding */
+  function bind(root){
+    root.querySelectorAll("input[id],textarea[id],select[id]").forEach(function(el){
+      if(el.id==="exportBox" || el.dataset.key || el.dataset.bound) return;
+      el.dataset.bound="1";
+      if(el.type==="checkbox"){
+        if(store[el.id]!=null) el.checked=!!store[el.id];
+        el.addEventListener("change", function(){ store[el.id]=el.checked; save(); });
+        return;
+      }
+      if(store[el.id]!=null) el.value=store[el.id];
+      var ev = el.tagName==="SELECT" ? "change" : "input";
+      el.addEventListener(ev, function(){ store[el.id]=el.value; save(); });
+    });
+  }
+
+  /* hours rows */
+  var hb=document.getElementById("hoursBody");
+  ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].forEach(function(d){
+    var k=d.slice(0,3).toLowerCase(), tr=document.createElement("tr");
+    tr.innerHTML='<td>'+d+'</td><td><input type="text" id="h_'+k+'_o" aria-label="'+d+' opens"></td><td><input type="text" id="h_'+k+'_c" aria-label="'+d+' closes"></td><td><input type="text" id="h_'+k+'_n" aria-label="'+d+' notes"></td>';
+    hb.appendChild(tr);
+  });
+
+  /* holiday rows */
+  var holBody=document.querySelector("#holTable tbody"), holCount=0;
+  function markHol(tr, sel){ tr.classList.toggle("moves", sel.value.indexOf("No")===0); }
+  function addHol(){
+    holCount++; var i=holCount, tr=document.createElement("tr");
+    tr.innerHTML='<td><input type="text" id="hol'+i+'_date" aria-label="Holiday '+i+' date"></td>'+
+      '<td><input type="text" id="hol'+i+'_name" aria-label="Holiday '+i+' name"></td>'+
+      '<td class="flag"><select id="hol'+i+'_fixed" aria-label="Holiday '+i+' same date every year"><option></option><option>Yes, fixed date</option><option>No, changes every year</option></select></td>';
+    holBody.appendChild(tr); bind(tr);
+    var sel=tr.querySelector("select"); markHol(tr, sel);
+    sel.addEventListener("change", function(){ markHol(tr, sel); });
+  }
+  var hrows=parseInt(store.__hrows||"5",10); if(!(hrows>0)) hrows=5;
+  for(var h=0;h<hrows;h++) addHol();
+  document.getElementById("addHol").addEventListener("click", function(){ addHol(); store.__hrows=String(holCount); save(); });
+
+  /* user rows */
+  var tbody=document.querySelector("#userTable tbody"), rowCount=0;
+  function addRow(){
+    rowCount++; var i=rowCount, tr=document.createElement("tr");
+    tr.innerHTML='<td><input type="text" id="u'+i+'_name" aria-label="Name row '+i+'"></td>'+
+      '<td><input type="text" id="u'+i+'_mail" aria-label="Email row '+i+'"></td>'+
+      '<td><select id="u'+i+'_role" aria-label="Role row '+i+'"><option></option><option>Agent</option><option>Supervisor</option><option>Admin</option></select></td>';
+    tbody.appendChild(tr); bind(tr);
+  }
+  var rows=parseInt(store.__rows||"6",10); if(!(rows>0)) rows=6;
+  for(var r=0;r<rows;r++) addRow();
+  document.getElementById("addRow").addEventListener("click", function(){ addRow(); store.__rows=String(rowCount); save(); });
+  bind(document.querySelector(".hero"));
+  document.querySelectorAll(".exp-group").forEach(bind);
+
+  renderAll();
+
+  /* export */
+  function buildExport(){
+    var nsv=document.getElementById("ns_name").value;
+    var out=["Workshop ContactRC: notes", "Exported: "+new Date().toLocaleString()];
+    if(nsv) out.push("National Society: "+nsv);
+    out.push("Languages: "+(multi?"several":"one"));
+    document.querySelectorAll(".exp-group").forEach(function(g){
+      if(g.closest("#sheets")) return;
+      out=out.concat(groupLines(g));
+    });
+    out.push("\n## Call flow messages");
+    var seen={};
+    S.forEach(function(s){ if(s.multi && !multi) return; keysOf(s).forEach(function(k){
+      if(seen[k]) return; seen[k]=1; out.push(P[k].t+" ("+k+"): "+((store["p_"+k]||"").trim()||"[not written yet]"));
+    }); });
+    document.querySelectorAll("#sheets .exp-group").forEach(function(g){ out=out.concat(groupLines(g)); });
+    return out.join("\n");
+  }
+  function groupLines(g){
+    var lines=[];
+    g.querySelectorAll("input[id],textarea[id],select[id]").forEach(function(el){
+      if(el.id==="exportBox") return;
+      var lab=el.getAttribute("aria-label")||el.id;
+      if(el.type==="checkbox"){ lines.push(lab+": "+(el.checked?"yes":"no")); return; }
+      if(!el.value) return;
+      lines.push(lab+": "+el.value);
+    });
+    return lines.length ? ["\n## "+g.getAttribute("data-title")].concat(lines) : [];
+  }
+  var lastText="";
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    lastText=buildExport();
+    var sec=document.getElementById("exportSec");
+    document.getElementById("exportBox").value=lastText; sec.hidden=false;
+    document.getElementById("exportMsg").textContent="Download the file, or select the text below and copy it.";
+    sec.scrollIntoView({behavior:"smooth"});
+  });
+  document.getElementById("downloadBtn").addEventListener("click", function(){
+    lastText=buildExport(); document.getElementById("exportBox").value=lastText;
+    var nsv=(document.getElementById("ns_name").value||"workshop").replace(/[^\w\-]+/g,"_");
+    var blob=new Blob([lastText],{type:"text/plain;charset=utf-8"}), a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download="ContactRC_workshop_"+nsv+"_"+new Date().toISOString().slice(0,10)+".txt";
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    document.getElementById("exportMsg").textContent="Downloaded. Check your downloads folder.";
+  });
+  document.getElementById("copyBtn").addEventListener("click", function(){
+    var box=document.getElementById("exportBox"), msg=document.getElementById("exportMsg");
+    box.select();
+    try{ navigator.clipboard.writeText(box.value).then(function(){ msg.textContent="Copied to your clipboard."; },function(){ msg.textContent="Copy failed. Select the text and press Ctrl+C."; }); }
+    catch(e){ msg.textContent="Select the text and press Ctrl+C."; }
+  });
+  document.getElementById("closeExport").addEventListener("click", function(){ document.getElementById("exportSec").hidden=true; });
+})();
+</script>
+
+</body>
+</html>
